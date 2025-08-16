@@ -12,21 +12,48 @@ endif::[]
 
 = Envio de Mensagens
 
-Atualmente, aplicações de diversas plataformas como web e mobile possuem recursos de envio de mensagens por diferentes meios como: email, sms, WhatsApp, notificações push, etc.
+Padrão de Projeto Utilizado: Strategy e Factory Method
 
-Considere você precisará: 
+Para resolver o problema de trocar ou alternar entre diferentes formas de envio de mensagens sem a necessidade de if() em todos os locais e encapsular o processo de decisão de qual classe instanciar, foram utilizados dois padrões de projeto:
 
-- trocar a forma de envio de mensagens por outra;
-- ou alternar entre diferentes formas. 
+1.
+Strategy (Estratégia): Este padrão define uma família de algoritmos, encapsula cada um deles e os torna intercambiáveis. O Strategy permite que o algoritmo varie independentemente dos clientes que o utilizam. No nosso caso, cada forma de envio de mensagem (Email, SMS, WhatsApp) é um algoritmo diferente, e o padrão Strategy nos permite alternar entre eles facilmente.
 
-No entanto, você não quer ficar escrevendo `if()` em todos os locais onde precisa definir qual classe será instanciada para enviar mensagens e quer que o processo de decisão de qual classe instanciar (que define a forma de envio de mensagens) seja encapsulado.
+2.
+Factory Method (Método Fábrica): Este padrão define uma interface para criar um objeto, mas permite que as subclasses decidam qual classe instanciar. O Factory Method permite que uma classe adie a instanciação para subclasses. No nosso caso, a MessageSenderFactory é responsável por criar a instância correta de MessageSender (Email, SMS, WhatsApp) com base em um parâmetro de entrada, eliminando a necessidade de if() ou switch na classe cliente (Principal).
 
-Faça as alterações necessárias no projeto atual e implemente um padrão para resolver os problemas mencionados.
+Implementação
 
-> O projeto requer JDK 11 ou superior.
+A implementação seguiu os seguintes passos:
 
-== Responda
+1.
+Criação da Interface MessageSender: Uma interface MessageSender foi criada para definir o contrato de envio de mensagens, garantindo que todas as classes de envio de mensagens tenham um método send.
 
-1. Qual padrão de projeto pode ser utilizado para resolver este problema? Implemente a solução (não precisa enviar mensagens de fato, apenas simular com prints).
+2.
+Implementação das Classes Concretas de Envio: Classes como EmailSender, SmsSender e WhatsAppSender foram criadas, cada uma implementando a interface MessageSender e simulando o envio da mensagem com um System.out.printf().
 
-Implemente o projeto e envie link para repositório no GitHub, onde o README deve conter as respostas.
+3.
+Criação da MessageSenderFactory: Uma classe MessageSenderFactory foi implementada com um método estático createSender que recebe o tipo de envio desejado (ex: "email", "sms", "whatsapp") e retorna a instância correta da classe MessageSender.
+
+4.
+Modificação da Classe Newsletter: A classe Newsletter foi modificada para receber uma instância de MessageSender em seu construtor, em vez de instanciar diretamente um tipo específico de serviço de mensagem. Isso a torna independente da implementação concreta do serviço de envio.
+
+5.
+Modificação da Classe Principal: A classe Principal agora utiliza a MessageSenderFactory para obter a instância correta de MessageSender e passá-la para o construtor da Newsletter. Isso demonstra como o cliente pode alternar facilmente entre diferentes estratégias de envio sem conhecer os detalhes de implementação.
+
+Como o Problema Original Foi Resolvido
+
+Com a aplicação dos padrões Strategy e Factory Method, o problema original foi resolvido da seguinte forma:
+
+•
+Eliminação de if()/switch na classe cliente: A decisão de qual classe de envio de mensagem instanciar foi encapsulada na MessageSenderFactory. A classe Principal (cliente) não precisa mais de estruturas condicionais (if() ou switch) para determinar qual serviço de mensagem usar. Ela simplesmente solicita o tipo desejado à fábrica.
+
+•
+Encapsulamento do processo de decisão: A lógica para criar a instância correta de MessageSender está centralizada na MessageSenderFactory. Isso torna o código mais limpo, fácil de manter e menos propenso a erros quando novas formas de envio de mensagens são adicionadas.
+
+•
+Flexibilidade e Extensibilidade: É fácil adicionar novas formas de envio de mensagens (ex: TelegramSender, PushNotificationSender) no futuro. Basta criar uma nova classe que implemente MessageSender e adicionar uma nova entrada na MessageSenderFactory. Nenhuma alteração é necessária nas classes Newsletter ou Principal.
+
+•
+Baixo Acoplamento: A classe Newsletter agora depende apenas da interface MessageSender, e não de implementações concretas. Isso reduz o acoplamento entre as classes, tornando o sistema mais modular e fácil de testar.
+
